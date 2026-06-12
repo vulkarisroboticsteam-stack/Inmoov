@@ -1,0 +1,9 @@
+bleak
+opencv-python==4.9.0.80
+mediapipe==0.10.14
+cvzone==1.6.1
+numpy==1.26.4
+msvc-runtime
+fastapi
+uvicorn
+websockets

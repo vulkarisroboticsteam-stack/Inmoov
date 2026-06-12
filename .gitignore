@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.npm/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+get_colors.py
+*.log

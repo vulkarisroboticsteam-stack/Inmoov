@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap');
+
+:root {
+  --bg-color: #050505;
+  --glass-bg: rgba(20, 20, 22, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #e0e0e0;
+  --text-secondary: #888888;
+  --accent-blue: #0088ff;
+  --active-color: #ffffff;
+  --danger-color: #ff3333;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  overflow: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(0, 0, 32, 0.4), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(0, 20, 40, 0.3), transparent 50%);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+/* Video Section */
+.video-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border);
+  background: #000;
+}
+
+.video-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Para não cortar a imagem do OpenCV */
+}
+
+.video-overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+}
+
+/* Status Panel */
+.status-panel {
+  width: 380px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 1rem;
+}
+
+.header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #fff, #888);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.status-card {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--glass-border);
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.ble-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ble-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ble-connected {
+  background: rgba(0, 255, 128, 0.1);
+  color: #00ff80;
+  border: 1px solid rgba(0, 255, 128, 0.2);
+}
+
+.ble-connected::before {
+  background: #00ff80;
+  box-shadow: 0 0 8px #00ff80;
+}
+
+.ble-disconnected {
+  background: rgba(255, 51, 51, 0.1);
+  color: #ff3333;
+  border: 1px solid rgba(255, 51, 51, 0.2);
+}
+
+.ble-disconnected::before {
+  background: #ff3333;
+  box-shadow: 0 0 8px #ff3333;
+}
+
+.finger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.finger-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.finger-item.active {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 2px 0 0 #fff;
+}
+
+.finger-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.finger-state {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.active .finger-state {
+  color: #fff;
+}
+
+.inactive .finger-state {
+  color: var(--text-secondary);
+}
+
+.data-card {
+  margin-top: auto;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+}
+
+.data-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.data-value {
+  font-family: 'Outfit', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: 4px;
+}
+
+.data-value.blocked {
+  color: var(--danger-color);
+}
