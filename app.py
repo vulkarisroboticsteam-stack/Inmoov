@@ -38,6 +38,7 @@ class AppState:
     current_status = "WAITING"
     fps = 0
     fingers_to_send = None
+    current_hand_type = ""
 
 state = AppState()
 app = FastAPI()
@@ -115,13 +116,43 @@ def camera_thread_func():
             time.sleep(0.01)
             continue
             
-        hands, img = detector.findHands(img, draw=True)
+        hands, img = detector.findHands(img, draw=False)
         fingers_str = ""
         status_msg = "NO HAND"
         
         if hands:
             hand = hands[0]
-            fingers = detector.fingersUp(hand)
+            if 'lmList' in hand:
+                lmList = hand['lmList']
+                connections = [(0, 1), (1, 2), (2, 3), (3, 4), 
+                               (0, 5), (5, 6), (6, 7), (7, 8), 
+                               (5, 9), (9, 10), (10, 11), (11, 12), 
+                               (9, 13), (13, 14), (14, 15), (15, 16), 
+                               (13, 17), (17, 18), (18, 19), (19, 20), 
+                               (0, 17), (5, 9), (9, 13), (13, 17)]
+                for start, end in connections:
+                    x1, y1 = lmList[start][0], lmList[start][1]
+                    x2, y2 = lmList[end][0], lmList[end][1]
+                    cv2.line(img, (x1, y1), (x2, y2), (255, 136, 0), 2)
+                for lm in lmList:
+                    x, y = lm[0], lm[1]
+                    cv2.circle(img, (x, y), 5, (255, 136, 0), cv2.FILLED)
+                    
+            # Custom fingersUp for both palm and back of hands
+            fingers = []
+            if 'lmList' in hand:
+                # Thumb
+                if lmList[5][0] > lmList[17][0]:
+                    fingers.append(1 if lmList[4][0] > lmList[3][0] else 0)
+                else:
+                    fingers.append(1 if lmList[4][0] < lmList[3][0] else 0)
+                
+                # 4 Fingers
+                for tipId in [8, 12, 16, 20]:
+                    fingers.append(1 if lmList[tipId][1] < lmList[tipId - 2][1] else 0)
+            else:
+                fingers = [0, 0, 0, 0, 0]
+                
             fingers_str = "$" + "".join(map(str, fingers))
             
             if fingers_str in gestos_bloqueados:
@@ -129,6 +160,8 @@ def camera_thread_func():
             else:
                 status_msg = "OK"
                 state.fingers_to_send = fingers_str
+        else:
+            hand = None
                 
         cTime = time.time()
         state.fps = int(1 / (cTime - pTime)) if pTime != 0 else 0
@@ -136,6 +169,7 @@ def camera_thread_func():
         
         state.current_fingers = fingers_str
         state.current_status = status_msg
+        state.current_hand_type = hand["type"] if hands else ""
         
         _, buffer = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 60])
         state.current_frame = base64.b64encode(buffer).decode('utf-8')
@@ -159,7 +193,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     "fps": state.fps,
                     "ble_connected": state.ble_connected,
                     "fingers_str": state.current_fingers,
-                    "status": state.current_status
+                    "status": state.current_status,
+                    "hand_type": state.current_hand_type
                 }
                 await websocket.send_text(json.dumps(payload))
             await asyncio.sleep(0.03) # ~30 FPS limit for WS transmission

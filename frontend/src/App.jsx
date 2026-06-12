@@ -7,7 +7,8 @@ function App() {
     fps: 0,
     ble_connected: false,
     fingers_str: "",
-    status: "WAITING"
+    status: "WAITING",
+    hand_type: ""
   });
 
   const ws = useRef(null);
@@ -29,7 +30,8 @@ function App() {
           fps: payload.fps,
           ble_connected: payload.ble_connected,
           fingers_str: payload.fingers_str,
-          status: payload.status
+          status: payload.status,
+          hand_type: payload.hand_type
         });
       };
 
@@ -73,8 +75,20 @@ function App() {
 
       <div className="status-panel">
         <div className="header">
-          <h1>INMOOV HUB</h1>
-          <p>Painel de Controle Biométrico</p>
+          <div className="brand-section">
+            <img src="/logo_vulkaris.png" alt="Logo Vulkaris" className="brand-logo" />
+            <div className="brand-titles">
+              <h1>INMOOV HUB</h1>
+              <p>Painel de Controle Biométrico</p>
+            </div>
+          </div>
+          <a href="https://instagram.com/vulkaris_robotics" target="_blank" rel="noopener noreferrer" className="ig-link" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" width="26" height="26" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </a>
         </div>
 
         <div className="status-card">
@@ -90,11 +104,18 @@ function App() {
           </div>
         </div>
 
-        <div className="status-card" style={{ flex: 1 }}>
-          <div className="status-header">
+        <div className="status-card finger-tracking-card" style={{ flex: 1 }}>
+          <div className="finger-tracking-header">
             <span className="status-title">Rastreamento de Dedos</span>
+            {data.hand_type ? (
+              <div className="hand-type-badge">
+                MÃO {data.hand_type === 'Right' ? 'DIREITA' : 'ESQUERDA'} DETECTADA
+              </div>
+            ) : (
+              <div style={{ height: '26px' }}></div>
+            )}
           </div>
-          <div className="finger-list">
+          <div className="finger-list" style={{ width: '100%' }}>
             {fingers.map((f, idx) => (
               <div key={idx} className={`finger-item ${f.active ? 'active' : 'inactive'}`}>
                 <span className="finger-name">{f.name}</span>
