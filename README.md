@@ -1,71 +1,101 @@
-# Controle de Braço Robótico com Detecção de Mãos
+# 🤖 InMoov Hub: Controle de Braço Robótico com Visão Computacional
 
-Este projeto consiste no desenvolvimento de um braço robótico controlado em tempo real por meio da detecção de movimentos da mão do usuário. Ele é baseado no robô humanoide **InMoov** e combina programação em Python e um microcontrolador **ESP32** para integrar a captura de movimentos com o controle dos motores que movimentam o braço via **Bluetooth**.
+<p align="center">
+  <img src="frontend/public/logo_vulkaris.png" alt="InMoov Hub Logo" width="150"/>
+</p>
 
----
+<p align="center">
+  <strong>Painel de Controle Biométrico e Rastreamento de Mãos em Tempo Real</strong>
+</p>
 
-## 1. Hardware Utilizado
-- **Braço robótico** baseado no design do InMoov.
-- **Microcontrolador ESP32** com suporte a Bluetooth (BLE) para controle sem fio dos motores servo que movimentam os dedos do braço.
-- **Módulos servo** para controlar os dedos individualmente.
-- **Câmera (Webcam)** para capturar os movimentos da mão no PC.
-
----
-
-## 2. Funcionamento do Sistema
-O sistema é dividido em duas partes principais que se comunicam sem fio via Bluetooth Low Energy (BLE): **processamento de imagem** no computador (Python) e **controle dos motores** no microcontrolador (ESP32).
-
-### **Parte 1: Detecção de Movimentos com Python**
-- A biblioteca **cvzone** e seu módulo **HandDetector** (baseado em MediaPipe) são usados para detectar a mão do usuário a partir da imagem capturada pela câmera.
-- A posição dos dedos é analisada e convertida em um formato binário. Cada dedo é representado por um valor:  
-  - **1**: Dedo levantado.  
-  - **0**: Dedo abaixado.  
-- Os dados são enviados do PC para o ESP32 via **Bluetooth BLE** no formato `"$XXXXX"`, onde cada **X** corresponde ao estado de um dedo (polegar, indicador, médio, anelar, mínimo).
-
-### **Parte 2: Controle do Braço Robótico com ESP32**
-- No ESP32, os valores recebidos via Bluetooth controlam diretamente os motores servo. Cada motor é responsável por um dedo do braço robótico.
-- Quando o valor recebido para um dedo é **1**, o motor correspondente posiciona o dedo na posição "levantada". Para o valor **0**, o dedo é abaixado.
-- Essa lógica replica os movimentos da mão do usuário no braço robótico em tempo real.
+<p align="center">
+  <img alt="React" src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB"/>
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi"/>
+  <img alt="Python" src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
+  <img alt="C++" src="https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white"/>
+  <img alt="Bluetooth" src="https://img.shields.io/badge/bluetooth-%230082FC.svg?style=for-the-badge&logo=bluetooth&logoColor=white"/>
+</p>
 
 ---
 
-## 3. Código Python
-O código Python (`inmoov.py`) utiliza uma câmera para capturar a mão do usuário e processa os dados em tempo real:
-- Conecta automaticamente ao ESP32 chamado "InMoov_Hand" via BLE.
-- Detecta os dedos levantados com o auxílio das bibliotecas **cvzone** e **MediaPipe**.
-- Converte os dados para o formato apropriado e os envia ao ESP32 via conexão Bluetooth.
-- Exibe o feedback de confirmação recebido de volta do microcontrolador.
-- Possui um sistema de bloqueio de gestos inapropriados (como o dedo do meio isolado).
+## 📖 Sobre o Projeto
+
+O **InMoov Hub** é um sistema avançado desenvolvido para controlar um braço robótico (baseado no design humanoide InMoov) de forma totalmente sem fio e em tempo real. Utilizando apenas uma webcam, o sistema lê os movimentos da mão humana, processa os dados via Inteligência Artificial e os transmite instantaneamente para um microcontrolador **ESP32** via **Bluetooth Low Energy (BLE)**.
+
+Recentemente, o projeto evoluiu de um simples script para uma arquitetura moderna dividida entre um **Frontend em React** (Painel de Controle) e um **Backend em FastAPI**.
 
 ---
 
-## 4. Código ESP32 (C++)
-O código em C++ (`inmoov_hand.ino`) é responsável por:
-- Inicializar o rádio Bluetooth BLE e atuar como um servidor para o PC conectar.
-- Interpretar os comandos de posição da mão recebidos do Python.
-- Controlar 5 motores servo para movimentar os dedos do braço robótico correspondente à leitura recebida.
-- Enviar mensagens de status (OK) de volta para o Python após cada movimento bem sucedido.
+## 🌟 Principais Recursos
+
+- 🖐️ **Rastreamento de Mãos Robusto:** Desenho em tempo real das conexões na mão. Agora suporta tanto a **palma** quanto o **dorso da mão**, evitando perdas de tracking se a mão for virada!
+- ⚡ **Comunicação WebSockets:** Transmissão de vídeo e biometria em alta velocidade (~30 FPS) entre o servidor Python e o dashboard web.
+- 🎨 **Painel "Glassmorphism":** Interface super moderna feita em React com efeitos translúcidos e design futurista inspirado em Sci-Fi.
+- 🛜 **Controle BLE Sem Fio:** Envio instantâneo dos comandos motores do PC direto para a placa ESP32.
+- 🛡️ **Segurança de Gestos:** Bloqueio automático de gestos inapropriados.
 
 ---
 
-## 5. Integração e Operação
-1. Ligue o ESP32 conectado aos Servomotores.
-2. Inicie o script Python no PC. O script se conectará ao ESP32 via Bluetooth automaticamente.
-3. O usuário posiciona a mão em frente à câmera.
-4. O Python detecta os dedos levantados, converte as informações e as envia para o ESP32.
-5. O ESP32 processa os dados e movimenta os dedos do braço robótico, reproduzindo fielmente os movimentos da mão.
+## 🏗️ Arquitetura do Sistema
+
+### 1. Frontend (React + Vite)
+- Dashboard biométrico elegante.
+- Mostra qual mão (`MÃO DIREITA` ou `MÃO ESQUERDA`) foi detectada pelo sistema.
+- Exibe o status da conexão BLE com o braço, o ping de FPS da câmera e os dados da mão sendo transmitidos (`$XXXXX`).
+
+### 2. Backend (FastAPI + OpenCV + Bleak)
+- Roda no arquivo `app.py`.
+- **MediaPipe / CVZone:** Responsável pela análise dos *landmarks* da mão do usuário. Lógica customizada matemática para identificar flexões de dedo em qualquer orientação da mão.
+- **Bleak:** Biblioteca Python que varre o ambiente em busca da ESP32 chamada `InMoov_Hand` e estabelece a conexão remota.
+
+### 3. Hardware (ESP32 + Servomotores)
+- Código em C++ (`inmoov_hand.ino`) que atua como servidor BLE.
+- Assim que o ESP32 recebe a string de posições, ele traduz os "0"s e "1"s para ângulos de atuação dos 5 servomotores independentes, abrindo e fechando cada um dos dedos de acordo com a sua mão em tempo real.
 
 ---
 
-## Conclusão
-Este projeto demonstra como a integração entre visão computacional, comunicações sem fio e hardware pode ser usada para criar sistemas interativos sofisticados. Ele destaca a eficiência do uso de Python para processamento de imagem pesado e do microcontrolador ESP32 com Bluetooth para controle rápido de motores e atuadores a distância.
+## 🚀 Como Executar
+
+### Pré-requisitos
+- Python 3.10+
+- Node.js e NPM
+- Uma webcam conectada
+- ESP32 ligada e executando o código `.ino`
+
+### Backend (Processamento e IA)
+```bash
+# Ative seu ambiente virtual (se aplicável)
+# .venv\Scripts\activate
+
+# Instale os requerimentos
+pip install -r requirements.txt
+
+# Inicie o servidor FastAPI (a câmera será aberta)
+python app.py
+```
+
+### Frontend (Dashboard UI)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Abra o navegador no endereço local fornecido (geralmente `http://localhost:5173`) para visualizar o Painel Hub.
 
 ---
 
-### Tecnologias e Ferramentas:
- <div style="display=inline-block">
+## 🛠️ Tecnologias e Ferramentas
+
+ <div style="display=inline-block; margin-top: 10px;">
+    <img height=40 title="React" alt="React" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg"/>&nbsp;
+    <img height=40 title="FastAPI" alt="FastAPI" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/fastapi/fastapi-original.svg"/>&nbsp;
     <img height=40 title="ESP32" alt="ESP32" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg"/>&nbsp;
     <img height=40 title="Python" alt="Python" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg"/>&nbsp;
-    <img height=40 title="Bluetooth" alt="Bluetooth" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/bluetooth/bluetooth-original.svg"/>&nbsp;
     <img height=40 title="OpenCV" alt="OpenCV" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/opencv/opencv-original-wordmark.svg"/>&nbsp;
  </div>
+
+<br>
+
+<p align="center">
+  Feito com 💙 para robótica inteligente.
+</p>
