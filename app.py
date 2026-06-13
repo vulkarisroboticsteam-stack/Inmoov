@@ -13,6 +13,9 @@ from bleak import BleakScanner, BleakClient
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module="google.protobuf.symbol_database")
 
 try:
     from bleak.backends.winrt.util import uninitialize_sta
@@ -25,6 +28,11 @@ RX_CHAR_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 TX_CHAR_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
 gestos_bloqueados = ["$00100", "$10100"]
+
+from pydantic import BaseModel
+
+class CameraSelection(BaseModel):
+    index: int
 
 # Estado Global
 class AppState:
@@ -39,6 +47,7 @@ class AppState:
     fps = 0
     fingers_to_send = None
     current_hand_type = ""
+    camera_index = 0
 
 state = AppState()
 app = FastAPI()
@@ -57,9 +66,22 @@ def notificacao_ble(sender, data):
     except Exception:
         pass
 
+def ble_disconnect_callback(client):
+    print("ESP32 desconectada!")
+    state.ble_connected = False
+    state.ble_client = None
+
 async def connect_ble():
     print("Procurando ESP32 via Bluetooth BLE...")
     try:
+        if state.ble_client and state.ble_connected:
+            try:
+                await state.ble_client.disconnect()
+            except:
+                pass
+        state.ble_client = None
+        state.ble_connected = False
+        
         devices = await BleakScanner.discover(timeout=8)
         target_device = None
         for device in devices:
@@ -69,7 +91,7 @@ async def connect_ble():
                 
         if target_device:
             print(f"ESP32 encontrada: {target_device.name}")
-            state.ble_client = BleakClient(target_device)
+            state.ble_client = BleakClient(target_device, disconnected_callback=ble_disconnect_callback)
             await state.ble_client.connect()
             state.ble_connected = True
             print("Conectado à ESP32 via BLE.")
@@ -102,15 +124,29 @@ async def ble_sender_loop():
 import threading
 
 def camera_thread_func():
-    cap = cv2.VideoCapture(0)
+    current_index = state.camera_index
+    cap = cv2.VideoCapture(current_index)
     if not cap.isOpened():
-        print("Erro: Não foi possível acessar a câmera.")
-        return
+        print(f"Erro: Não foi possível acessar a câmera {current_index}.")
 
     detector = HandDetector(maxHands=1, detectionCon=0.7)
     pTime = 0
     
     while True:
+        if state.camera_index != current_index:
+            if cap and cap.isOpened():
+                cap.release()
+            current_index = state.camera_index
+            cap = cv2.VideoCapture(current_index)
+            if not cap.isOpened():
+                print(f"Erro: Não foi possível acessar a câmera {current_index}.")
+                time.sleep(1)
+                continue
+
+        if cap is None or not cap.isOpened():
+            time.sleep(1)
+            continue
+
         success, img = cap.read()
         if not success:
             time.sleep(0.01)
@@ -181,6 +217,34 @@ async def startup_event():
     asyncio.create_task(connect_ble())
     asyncio.create_task(ble_sender_loop())
     threading.Thread(target=camera_thread_func, daemon=True).start()
+
+@app.post("/api/reconnect_ble")
+async def api_reconnect_ble():
+    asyncio.create_task(connect_ble())
+    return {"status": "reconnecting"}
+
+@app.get("/api/cameras")
+async def get_cameras():
+    import subprocess
+    try:
+        output = subprocess.check_output('wmic path Win32_PnPEntity where "PNPClass=\'Image\' OR PNPClass=\'Camera\'" get Caption /value', shell=True).decode('utf-8', errors='ignore')
+        cameras = []
+        for line in output.split('\n'):
+            line = line.strip()
+            if line.startswith('Caption='):
+                name = line.split('=', 1)[1]
+                if name:
+                    cameras.append(name)
+        if not cameras:
+            return {"cameras": ["Câmera 0", "Câmera 1", "Câmera 2"]}
+        return {"cameras": cameras}
+    except Exception as e:
+        return {"cameras": ["Câmera 0", "Câmera 1", "Câmera 2"]}
+
+@app.post("/api/set_camera")
+async def api_set_camera(cam: CameraSelection):
+    state.camera_index = cam.index
+    return {"status": "ok", "camera_index": state.camera_index}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

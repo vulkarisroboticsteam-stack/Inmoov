@@ -11,7 +11,49 @@ function App() {
     hand_type: ""
   });
 
+  const [cameraIndex, setCameraIndex] = useState(0);
+  const [cameraList, setCameraList] = useState([]);
+
   const ws = useRef(null);
+
+  useEffect(() => {
+    const fetchCameras = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/cameras');
+        const data = await res.json();
+        if (data.cameras) {
+          setCameraList(data.cameras);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar câmeras:", err);
+      }
+    };
+    fetchCameras();
+  }, []);
+
+  const handleCameraChange = async (e) => {
+    const newIndex = parseInt(e.target.value, 10);
+    setCameraIndex(newIndex);
+    try {
+      await fetch('http://localhost:8000/api/set_camera', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index: newIndex })
+      });
+    } catch (err) {
+      console.error("Erro ao mudar câmera:", err);
+    }
+  };
+
+  const handleReconnectBle = async () => {
+    try {
+      await fetch('http://localhost:8000/api/reconnect_ble', {
+        method: 'POST'
+      });
+    } catch (err) {
+      console.error("Erro ao reconectar BLE:", err);
+    }
+  };
 
   useEffect(() => {
     const connectWs = () => {
@@ -94,8 +136,15 @@ function App() {
         <div className="status-card">
           <div className="status-header">
             <span className="status-title">Sistema BLE</span>
-            <div className={`ble-badge ${data.ble_connected ? 'ble-connected' : 'ble-disconnected'}`}>
-              {data.ble_connected ? 'CONECTADO' : 'DESCONECTADO'}
+            <div className="ble-controls">
+              <div className={`ble-badge ${data.ble_connected ? 'ble-connected' : 'ble-disconnected'}`}>
+                {data.ble_connected ? 'CONECTADO' : 'DESCONECTADO'}
+              </div>
+              {!data.ble_connected && (
+                <button className="reconnect-btn" onClick={handleReconnectBle} title="Tentar reconectar">
+                  ↻
+                </button>
+              )}
             </div>
           </div>
           <div className="status-header" style={{ marginBottom: 0, marginTop: '1rem' }}>
@@ -130,6 +179,25 @@ function App() {
           <div className={`data-value ${data.status === 'BLOCKED' ? 'blocked' : ''}`}>
             {data.status === 'BLOCKED' ? 'BLOQUEADO' : (data.fingers_str || '---')}
           </div>
+        </div>
+
+        <div className="camera-selector">
+          <label htmlFor="camera-select">Câmera:</label>
+          <select id="camera-select" value={cameraIndex} onChange={handleCameraChange}>
+            {cameraList.length > 0 ? (
+              cameraList.map((camName, idx) => (
+                <option key={idx} value={idx}>{camName}</option>
+              ))
+            ) : (
+              <>
+                <option value={0}>Câmera 0</option>
+                <option value={1}>Câmera 1</option>
+                <option value={2}>Câmera 2</option>
+                <option value={3}>Câmera 3</option>
+                <option value={4}>Câmera 4</option>
+              </>
+            )}
+          </select>
         </div>
       </div>
     </div>
