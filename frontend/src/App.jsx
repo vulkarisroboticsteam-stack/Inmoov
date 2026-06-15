@@ -6,6 +6,7 @@ function App() {
   const [data, setData] = useState({
     fps: 0,
     ble_connected: false,
+    ble_searching: false,
     fingers_str: "",
     status: "WAITING",
     hand_type: ""
@@ -71,6 +72,7 @@ function App() {
         setData({
           fps: payload.fps,
           ble_connected: payload.ble_connected,
+          ble_searching: payload.ble_searching,
           fingers_str: payload.fingers_str,
           status: payload.status,
           hand_type: payload.hand_type
@@ -137,10 +139,10 @@ function App() {
           <div className="status-header">
             <span className="status-title">Sistema BLE</span>
             <div className="ble-controls">
-              <div className={`ble-badge ${data.ble_connected ? 'ble-connected' : 'ble-disconnected'}`}>
-                {data.ble_connected ? 'CONECTADO' : 'DESCONECTADO'}
+              <div className={`ble-badge ${data.ble_connected ? 'ble-connected' : data.ble_searching ? 'ble-searching' : 'ble-disconnected'}`}>
+                {data.ble_connected ? 'CONECTADO' : data.ble_searching ? 'PROCURANDO...' : 'DESCONECTADO'}
               </div>
-              {!data.ble_connected && (
+              {!data.ble_connected && !data.ble_searching && (
                 <button className="reconnect-btn" onClick={handleReconnectBle} title="Tentar reconectar">
                   ↻
                 </button>

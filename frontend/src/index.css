@@ -255,6 +255,23 @@ body {
   box-shadow: 0 0 8px #ff3333;
 }
 
+.ble-searching {
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+.ble-searching::before {
+  background: #ffaa00;
+  box-shadow: 0 0 8px #ffaa00;
+  animation: pulse-ble 1s infinite alternate;
+}
+
+@keyframes pulse-ble {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
 .finger-list {
   display: flex;
   flex-direction: column;

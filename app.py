@@ -37,6 +37,7 @@ class CameraSelection(BaseModel):
 # Estado Global
 class AppState:
     ble_connected = False
+    ble_searching = False
     ble_client = None
     prev_fingers_str = ""
     last_send_time = 0
@@ -72,6 +73,9 @@ def ble_disconnect_callback(client):
     state.ble_client = None
 
 async def connect_ble():
+    if state.ble_searching:
+        return
+    state.ble_searching = True
     print("Procurando ESP32 via Bluetooth BLE...")
     try:
         if state.ble_client and state.ble_connected:
@@ -103,6 +107,8 @@ async def connect_ble():
             print("ESP32 não encontrada.")
     except Exception as e:
         print(f"Erro BLE: {e}")
+    finally:
+        state.ble_searching = False
 
 async def ble_sender_loop():
     prev_sent = ""
@@ -256,6 +262,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     "frame": state.current_frame,
                     "fps": state.fps,
                     "ble_connected": state.ble_connected,
+                    "ble_searching": state.ble_searching,
                     "fingers_str": state.current_fingers,
                     "status": state.current_status,
                     "hand_type": state.current_hand_type

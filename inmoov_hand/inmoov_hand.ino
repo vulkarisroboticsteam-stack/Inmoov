@@ -1,5 +1,5 @@
 #include <ArduinoBLE.h>
-#include <ESP32Servo.h>
+#include <Servo.h>
 
 #define numOfValsRec 5
 #define PIN_THUMB  3
