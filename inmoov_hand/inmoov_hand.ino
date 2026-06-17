@@ -66,12 +66,23 @@ void setup() {
 void loop() {
   BLE.poll();
 
-  if (rxCharacteristic.written()) {
-    String comando = rxCharacteristic.value();
-    comando.trim();
+  String comando = "";
+  bool recebido = false;
 
+  if (rxCharacteristic.written()) {
+    comando = rxCharacteristic.value();
+    recebido = true;
     Serial.print("Recebido via BLE: ");
     Serial.println(comando);
+  } else if (Serial.available() > 0) {
+    comando = Serial.readStringUntil('\n');
+    recebido = true;
+    Serial.print("Recebido via Serial: ");
+    Serial.println(comando);
+  }
+
+  if (recebido) {
+    comando.trim();
 
     if (comandoValido(comando)) {
       for (int i = 0; i < numOfValsRec; i++) {

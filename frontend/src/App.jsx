@@ -56,6 +56,16 @@ function App() {
     }
   };
 
+  const handleDisconnectBle = async () => {
+    try {
+      await fetch('http://localhost:8000/api/disconnect_ble', {
+        method: 'POST'
+      });
+    } catch (err) {
+      console.error("Erro ao desconectar BLE:", err);
+    }
+  };
+
   useEffect(() => {
     const connectWs = () => {
       ws.current = new WebSocket('ws://localhost:8000/ws');
@@ -145,6 +155,11 @@ function App() {
               {!data.ble_connected && !data.ble_searching && (
                 <button className="reconnect-btn" onClick={handleReconnectBle} title="Tentar reconectar">
                   ↻
+                </button>
+              )}
+              {data.ble_connected && (
+                <button className="reconnect-btn" onClick={handleDisconnectBle} title="Desconectar" style={{color: '#ff4444'}}>
+                  ✖
                 </button>
               )}
             </div>

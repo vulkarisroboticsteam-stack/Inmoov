@@ -27,7 +27,9 @@ DEVICE_NAME = "InMoov_Hand"
 RX_CHAR_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 TX_CHAR_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-gestos_bloqueados = ["$00100", "$10100"]
+#gestos_bloqueados = ["$00100", "$10100"]
+gestos_bloqueados = []
+
 
 from pydantic import BaseModel
 
@@ -228,6 +230,19 @@ async def startup_event():
 async def api_reconnect_ble():
     asyncio.create_task(connect_ble())
     return {"status": "reconnecting"}
+
+@app.post("/api/disconnect_ble")
+async def api_disconnect_ble():
+    if state.ble_client and state.ble_connected:
+        try:
+            await state.ble_client.disconnect()
+        except:
+            pass
+    state.ble_client = None
+    state.ble_connected = False
+    state.ble_searching = False
+    return {"status": "disconnected"}
+
 
 @app.get("/api/cameras")
 async def get_cameras():
