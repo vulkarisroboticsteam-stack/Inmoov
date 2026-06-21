@@ -1,0 +1,57 @@
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  padding: 2rem;
+  gap: 2rem;
+  flex-direction: row;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1024px) {
+  .app-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  aside.status-panel {
+    width: 100%;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* Elementos decorativos de fundo gerais */
+.bg-orb-1 {
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 480px;
+  height: 480px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  animation: float 9s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-orb-2 {
+  position: absolute;
+  bottom: -10%;
+  left: -5%;
+  width: 360px;
+  height: 360px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.1;
+  animation: float 11s ease-in-out infinite reverse;
+  pointer-events: none;
+  z-index: 0;
+}

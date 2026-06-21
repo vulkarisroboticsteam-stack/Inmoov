@@ -1,0 +1,60 @@
+.video-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border-color: var(--color-border);
+  min-height: 50vh;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+  background-color: #000;
+}
+
+.video-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Não aplicaremos o filtro saturate do Vulkaris aqui para não estragar a imagem da câmera,
+     mas podemos aplicar no hover? Não, vídeo precisa ser original. */
+}
+
+.video-overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  letter-spacing: 2px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.scan-line-overlay {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary), 0 0 20px var(--color-primary-glow-strong);
+  opacity: 0.5;
+  animation: scan-line 6s linear infinite;
+  pointer-events: none;
+}
+
+/* HUD Corners decorativos */
+.hud-corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-primary-light);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.hud-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+.hud-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+.hud-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+.hud-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }

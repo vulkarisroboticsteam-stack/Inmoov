@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
+import './App.css';
+import VideoFeed from './components/VideoFeed';
+import StatusPanel from './components/StatusPanel';
 
 function App() {
   const [frame, setFrame] = useState(null);
@@ -21,9 +24,9 @@ function App() {
     const fetchCameras = async () => {
       try {
         const res = await fetch('http://localhost:8000/api/cameras');
-        const data = await res.json();
-        if (data.cameras) {
-          setCameraList(data.cameras);
+        const json = await res.json();
+        if (json.cameras) {
+          setCameraList(json.cameras);
         }
       } catch (err) {
         console.error("Erro ao carregar câmeras:", err);
@@ -48,9 +51,7 @@ function App() {
 
   const handleReconnectBle = async () => {
     try {
-      await fetch('http://localhost:8000/api/reconnect_ble', {
-        method: 'POST'
-      });
+      await fetch('http://localhost:8000/api/reconnect_ble', { method: 'POST' });
     } catch (err) {
       console.error("Erro ao reconectar BLE:", err);
     }
@@ -58,9 +59,7 @@ function App() {
 
   const handleDisconnectBle = async () => {
     try {
-      await fetch('http://localhost:8000/api/disconnect_ble', {
-        method: 'POST'
-      });
+      await fetch('http://localhost:8000/api/disconnect_ble', { method: 'POST' });
     } catch (err) {
       console.error("Erro ao desconectar BLE:", err);
     }
@@ -70,9 +69,7 @@ function App() {
     const connectWs = () => {
       ws.current = new WebSocket('ws://localhost:8000/ws');
       
-      ws.current.onopen = () => {
-        console.log("WebSocket Conectado");
-      };
+      ws.current.onopen = () => console.log("WebSocket Conectado");
 
       ws.current.onmessage = (event) => {
         const payload = JSON.parse(event.data);
@@ -98,9 +95,7 @@ function App() {
     connectWs();
 
     return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
+      if (ws.current) ws.current.close();
     };
   }, []);
 
@@ -118,106 +113,23 @@ function App() {
   ];
 
   return (
-    <div className="app-container">
-      <div className="video-section">
-        {frame ? (
-          <img src={frame} alt="Video Feed" className="video-feed" />
-        ) : (
-          <div className="video-overlay-text">AGUARDANDO SINAL DA CÂMERA...</div>
-        )}
+    <>
+      <div className="bg-orb-1" aria-hidden="true"></div>
+      <div className="bg-orb-2" aria-hidden="true"></div>
+      
+      <div className="app-container">
+        <VideoFeed frame={frame} />
+        <StatusPanel 
+          data={data}
+          fingers={fingers}
+          cameraList={cameraList}
+          cameraIndex={cameraIndex}
+          onCameraChange={handleCameraChange}
+          onReconnectBle={handleReconnectBle}
+          onDisconnectBle={handleDisconnectBle}
+        />
       </div>
-
-      <div className="status-panel">
-        <div className="header">
-          <div className="brand-section">
-            <img src="/logo_vulkaris.png" alt="Logo Vulkaris" className="brand-logo" />
-            <div className="brand-titles">
-              <h1>INMOOV HUB</h1>
-              <p>Painel de Controle Biométrico</p>
-            </div>
-          </div>
-          <a href="https://instagram.com/vulkaris_robotics" target="_blank" rel="noopener noreferrer" className="ig-link" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" width="26" height="26" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-          </a>
-        </div>
-
-        <div className="status-card">
-          <div className="status-header">
-            <span className="status-title">Sistema BLE</span>
-            <div className="ble-controls">
-              <div className={`ble-badge ${data.ble_connected ? 'ble-connected' : data.ble_searching ? 'ble-searching' : 'ble-disconnected'}`}>
-                {data.ble_connected ? 'CONECTADO' : data.ble_searching ? 'PROCURANDO...' : 'DESCONECTADO'}
-              </div>
-              {!data.ble_connected && !data.ble_searching && (
-                <button className="reconnect-btn" onClick={handleReconnectBle} title="Tentar reconectar">
-                  ↻
-                </button>
-              )}
-              {data.ble_connected && (
-                <button className="reconnect-btn" onClick={handleDisconnectBle} title="Desconectar" style={{color: '#ff4444'}}>
-                  ✖
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="status-header" style={{ marginBottom: 0, marginTop: '1rem' }}>
-            <span className="status-title">Câmera FPS</span>
-            <span style={{ fontWeight: 'bold', color: '#fff' }}>{data.fps}</span>
-          </div>
-        </div>
-
-        <div className="status-card finger-tracking-card" style={{ flex: 1 }}>
-          <div className="finger-tracking-header">
-            <span className="status-title">Rastreamento de Dedos</span>
-            {data.hand_type ? (
-              <div className="hand-type-badge">
-                MÃO {data.hand_type === 'Right' ? 'DIREITA' : 'ESQUERDA'} DETECTADA
-              </div>
-            ) : (
-              <div style={{ height: '26px' }}></div>
-            )}
-          </div>
-          <div className="finger-list" style={{ width: '100%' }}>
-            {fingers.map((f, idx) => (
-              <div key={idx} className={`finger-item ${f.active ? 'active' : 'inactive'}`}>
-                <span className="finger-name">{f.name}</span>
-                <span className="finger-state">{f.active ? 'LEVANTADO' : 'ABAIXADO'}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="data-card">
-          <div className="data-title">DADOS ENVIADOS (TX)</div>
-          <div className={`data-value ${data.status === 'BLOCKED' ? 'blocked' : ''}`}>
-            {data.status === 'BLOCKED' ? 'BLOQUEADO' : (data.fingers_str || '---')}
-          </div>
-        </div>
-
-        <div className="camera-selector">
-          <label htmlFor="camera-select">Câmera:</label>
-          <select id="camera-select" value={cameraIndex} onChange={handleCameraChange}>
-            {cameraList.length > 0 ? (
-              cameraList.map((camName, idx) => (
-                <option key={idx} value={idx}>{camName}</option>
-              ))
-            ) : (
-              <>
-                <option value={0}>Câmera 0</option>
-                <option value={1}>Câmera 1</option>
-                <option value={2}>Câmera 2</option>
-                <option value={3}>Câmera 3</option>
-                <option value={4}>Câmera 4</option>
-              </>
-            )}
-          </select>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
