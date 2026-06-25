@@ -117,10 +117,22 @@ body {
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
-  /* Grid blueprint do Hero da Vulkaris (sutil) */
-  background-image: linear-gradient(rgba(79, 195, 247, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(79, 195, 247, 0.04) 1px, transparent 1px);
+  position: relative;
+}
+
+/* Grid blueprint do Hero da Vulkaris com fade-out radial (fidelidade de design) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(79, 195, 247, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 195, 247, 0.06) 1px, transparent 1px);
   background-size: 55px 55px;
+  mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 80%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 80%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }

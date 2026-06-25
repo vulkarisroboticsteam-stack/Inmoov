@@ -1,4 +1,3 @@
-import React from 'react';
 import '../styles/VideoFeed.css';
 
 export default function VideoFeed({ frame }) {

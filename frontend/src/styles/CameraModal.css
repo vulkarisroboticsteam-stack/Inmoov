@@ -1,0 +1,197 @@
+.camera-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 14, 21, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: camera-fade-in var(--transition-fast) ease-out;
+}
+
+.camera-modal-content {
+  width: 92%;
+  max-width: 440px;
+  background: rgba(26, 32, 48, 0.85);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(79, 195, 247, 0.05);
+  display: flex;
+  flex-direction: column;
+  animation: camera-scale-up var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.camera-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.camera-modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.camera-modal-icon-title {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 5px var(--color-primary-glow));
+}
+
+.camera-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.camera-modal-close-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.camera-modal-close-btn:hover {
+  background: var(--color-accent-glow);
+  color: var(--color-accent-light);
+  border-color: var(--color-accent);
+  transform: scale(1.08);
+}
+
+.camera-modal-divider {
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent), transparent);
+  margin-bottom: 1.2rem;
+  border-radius: 1px;
+}
+
+.camera-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom scrollbar for cameras list */
+.camera-modal-body::-webkit-scrollbar {
+  width: 4px;
+}
+.camera-modal-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.camera-modal-body::-webkit-scrollbar-thumb {
+  background: var(--color-primary-dark);
+  border-radius: 2px;
+}
+
+.camera-option-btn {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: left;
+  overflow: hidden;
+}
+
+.camera-option-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  z-index: 1;
+}
+
+.camera-option-icon {
+  color: var(--color-steel);
+  transition: color var(--transition-fast);
+}
+
+.camera-option-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.camera-option-badge {
+  background: var(--color-primary-glow);
+  color: var(--color-primary-light);
+  border: 1px solid var(--color-border);
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  font-family: var(--font-display);
+  letter-spacing: 1px;
+  box-shadow: 0 0 8px var(--color-primary-glow);
+  z-index: 1;
+}
+
+.camera-option-hover-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.04), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+/* Hover and Active states */
+.camera-option-btn:hover {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.camera-option-btn:hover .camera-option-icon {
+  color: var(--color-primary-light);
+}
+
+.camera-option-btn:hover .camera-option-hover-glow {
+  opacity: 1;
+}
+
+.camera-option-btn--active {
+  background: rgba(79, 195, 247, 0.08);
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.camera-option-btn--active .camera-option-icon {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px var(--color-primary-glow-strong));
+}
+
+/* Animations */
+@keyframes camera-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes camera-scale-up {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

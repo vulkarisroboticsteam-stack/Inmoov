@@ -1,8 +1,8 @@
-import React from 'react';
+import { useState } from 'react';
 import '../styles/StatusPanel.css';
-import { IconInstagram, IconRefresh, IconClose } from './Icons';
+import { IconInstagram, IconRefresh, IconClose, IconCamera } from './Icons';
 import FingerTracking from './FingerTracking';
-import CameraSelector from './CameraSelector';
+import CameraModal from './CameraModal';
 
 export default function StatusPanel({
   data,
@@ -13,6 +13,8 @@ export default function StatusPanel({
   onReconnectBle,
   onDisconnectBle
 }) {
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+
   return (
     <aside className="status-panel">
       {/* HEADER */}
@@ -24,9 +26,19 @@ export default function StatusPanel({
             <p>Painel de Controle Biométrico</p>
           </div>
         </div>
-        <a href="https://instagram.com/vulkaris_robotics" target="_blank" rel="noopener noreferrer" className="ig-link" aria-label="Instagram Vulkaris">
-          <IconInstagram size={24} />
-        </a>
+        <div className="header-actions">
+          <button 
+            className="camera-btn" 
+            onClick={() => setIsCameraModalOpen(true)} 
+            title="Selecionar dispositivo de vídeo" 
+            aria-label="Câmera"
+          >
+            <IconCamera size={20} />
+          </button>
+          <a href="https://instagram.com/vulkaris_robotics" target="_blank" rel="noopener noreferrer" className="ig-link" aria-label="Instagram Vulkaris">
+            <IconInstagram size={20} />
+          </a>
+        </div>
       </div>
 
       <div className="divider"></div>
@@ -69,12 +81,15 @@ export default function StatusPanel({
         </div>
       </div>
 
-      {/* CAMERA SELECTOR */}
-      <CameraSelector 
-        cameraList={cameraList} 
-        cameraIndex={cameraIndex} 
-        onCameraChange={onCameraChange} 
-      />
+      {/* CAMERA SELECTOR POPUP MODAL */}
+      {isCameraModalOpen && (
+        <CameraModal 
+          cameraList={cameraList} 
+          cameraIndex={cameraIndex} 
+          onCameraChange={onCameraChange} 
+          onClose={() => setIsCameraModalOpen(false)} 
+        />
+      )}
     </aside>
   );
 }

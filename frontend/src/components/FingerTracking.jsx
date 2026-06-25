@@ -1,4 +1,3 @@
-import React from 'react';
 import '../styles/FingerTracking.css';
 
 export default function FingerTracking({ data, fingers }) {
@@ -11,7 +10,9 @@ export default function FingerTracking({ data, fingers }) {
             MÃO {data.hand_type === 'Right' ? 'DIREITA' : 'ESQUERDA'}
           </div>
         ) : (
-          <div style={{ height: '26px' }}></div>
+          <div className="badge tracking-badge warning-badge">
+            MÃO NÃO DETECTADA
+          </div>
         )}
       </div>
 

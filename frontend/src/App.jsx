@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './index.css';
 import './App.css';
 import VideoFeed from './components/VideoFeed';
@@ -35,8 +35,11 @@ function App() {
     fetchCameras();
   }, []);
 
-  const handleCameraChange = async (e) => {
-    const newIndex = parseInt(e.target.value, 10);
+  const handleCameraChange = async (indexOrEvent) => {
+    const newIndex = typeof indexOrEvent === 'object' && indexOrEvent && indexOrEvent.target
+      ? parseInt(indexOrEvent.target.value, 10)
+      : parseInt(indexOrEvent, 10);
+
     setCameraIndex(newIndex);
     try {
       await fetch('http://localhost:8000/api/set_camera', {
