@@ -54,6 +54,20 @@ Recentemente, o projeto evoluiu de um simples script para uma arquitetura modern
 
 ---
 
+## 📂 Estrutura de Pastas
+
+O repositório está organizado da seguinte forma:
+
+- 📂 arquivos_2d: Contém os arquivos vetoriais em 2D (ex: o desenho `box_inmoov.dxf` para corte a laser da caixa dos componentes).
+- 📂 arquivos_3d: Contém todos os arquivos STL para a impressão 3D das peças da mão robótica (como dedos, punho e suportes), do projeto de hardware aberto [InMoov](https://inmoov.fr).
+- 📂 esquematico_pcb: Contém o esquema elétrico/imagem da PCB (`PCB_inmoov.png`) para montagem do circuito eletrônico do projeto.
+- 📂 frontend: Código fonte da interface web (dashboard) desenvolvida em React + Vite.
+- 📂 inmoov_hand: Contém o código C++ (`inmoov_hand.ino`) para gravação na placa ESP32, responsável pelo controle dos servomotores via BLE.
+- 📄 app.py: Arquivo principal do backend em FastAPI que realiza a captura da câmera, processamento de visão computacional (MediaPipe) e envio de dados da mão.
+
+
+---
+
 ## 🚀 Como Executar
 
 ### Pré-requisitos
