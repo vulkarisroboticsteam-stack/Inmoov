@@ -243,3 +243,15 @@
   color: var(--color-accent);
   letter-spacing: 1px;
 }
+
+.ble-error-box {
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(255, 107, 26, 0.08);
+  border: 1px solid rgba(255, 107, 26, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-accent-light);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-shadow: 0 0 8px rgba(255, 107, 26, 0.15);
+}

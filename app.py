@@ -14,6 +14,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import warnings
+import math
+
 
 warnings.filterwarnings("ignore", category=UserWarning, module="google.protobuf.symbol_database")
 
@@ -51,6 +53,7 @@ class AppState:
     fingers_to_send = None
     current_hand_type = ""
     camera_index = 0
+    ble_error = None
 
 state = AppState()
 app = FastAPI()
@@ -73,11 +76,13 @@ def ble_disconnect_callback(client):
     print("ESP32 desconectada!")
     state.ble_connected = False
     state.ble_client = None
+    state.ble_error = None
 
 async def connect_ble():
     if state.ble_searching:
         return
     state.ble_searching = True
+    state.ble_error = None
     print("Procurando ESP32 via Bluetooth BLE...")
     try:
         if state.ble_client and state.ble_connected:
@@ -100,6 +105,7 @@ async def connect_ble():
             state.ble_client = BleakClient(target_device, disconnected_callback=ble_disconnect_callback)
             await state.ble_client.connect()
             state.ble_connected = True
+            state.ble_error = None
             print("Conectado à ESP32 via BLE.")
             try:
                 await state.ble_client.start_notify(TX_CHAR_UUID, notificacao_ble)
@@ -107,8 +113,11 @@ async def connect_ble():
                 pass
         else:
             print("ESP32 não encontrada.")
+            state.ble_error = "ESP32 não encontrada."
     except Exception as e:
-        print(f"Erro BLE: {e}")
+        err_msg = str(e)
+        print(f"Erro BLE: {err_msg}")
+        state.ble_error = err_msg
     finally:
         state.ble_searching = False
 
@@ -184,6 +193,7 @@ def camera_thread_func():
                     
             # Custom fingersUp for both palm and back of hands
             fingers = []
+            wrist_angle = 90
             if 'lmList' in hand:
                 # Thumb
                 if lmList[5][0] > lmList[17][0]:
@@ -194,24 +204,53 @@ def camera_thread_func():
                 # 4 Fingers
                 for tipId in [8, 12, 16, 20]:
                     fingers.append(1 if lmList[tipId][1] < lmList[tipId - 2][1] else 0)
+                
+                # Wrist angle calculation (Palm as 90º initial state, rotation to Dorso is 90º-0º for Right Hand and 90º-180º for Left Hand)
+                try:
+                    # Calculate hand scale (distance from wrist 0 to middle finger base 9)
+                    scale = math.hypot(lmList[9][0] - lmList[0][0], lmList[9][1] - lmList[0][1])
+                    if scale < 1.0:
+                        scale = 1.0
+                    
+                    # Calculate ratio of horizontal distance between index base (5) and pinky base (17)
+                    ratio = (lmList[5][0] - lmList[17][0]) / scale
+                    clamped_ratio = max(-0.6, min(0.6, ratio))
+                    
+                    hand_type = hand.get("type", "Right")
+                    if hand_type == "Left":
+                        # Left Hand: Palm (clamped_ratio = -0.6) is 90º, Dorso (clamped_ratio = 0.6) is 180º
+                        mapped_angle = 90.0 + (clamped_ratio + 0.6) * 75.0
+                    else:
+                        # Right Hand: Palm (clamped_ratio = 0.6) is 90º, Dorso (clamped_ratio = -0.6) is 0º
+                        mapped_angle = 90.0 + (clamped_ratio - 0.6) * 75.0
+                    
+                    # Round to nearest 5 degrees to reduce jitter and BLE transmission frequency
+                    quantized_angle = int(round(mapped_angle / 5.0) * 5.0)
+                    wrist_angle = max(0, min(180, quantized_angle))
+                except Exception:
+                    wrist_angle = 90
             else:
                 fingers = [0, 0, 0, 0, 0]
                 
             fingers_str = "$" + "".join(map(str, fingers))
+            payload_str = f"{fingers_str},{wrist_angle:03d}"
             
             if fingers_str in gestos_bloqueados:
                 status_msg = "BLOCKED"
             else:
                 status_msg = "OK"
-                state.fingers_to_send = fingers_str
+                state.fingers_to_send = payload_str
         else:
             hand = None
+            fingers_str = ""
+            payload_str = ""
                 
         cTime = time.time()
         state.fps = int(1 / (cTime - pTime)) if pTime != 0 else 0
         pTime = cTime
         
-        state.current_fingers = fingers_str
+        state.current_fingers = payload_str
+
         state.current_status = status_msg
         state.current_hand_type = hand["type"] if hands else ""
         
@@ -241,6 +280,7 @@ async def api_disconnect_ble():
     state.ble_client = None
     state.ble_connected = False
     state.ble_searching = False
+    state.ble_error = None
     return {"status": "disconnected"}
 
 
@@ -280,7 +320,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     "ble_searching": state.ble_searching,
                     "fingers_str": state.current_fingers,
                     "status": state.current_status,
-                    "hand_type": state.current_hand_type
+                    "hand_type": state.current_hand_type,
+                    "ble_error": state.ble_error
                 }
                 await websocket.send_text(json.dumps(payload))
             await asyncio.sleep(0.03) # ~30 FPS limit for WS transmission

@@ -110,3 +110,77 @@
   0%, 100% { box-shadow: 0 0 10px var(--color-accent-glow); }
   50% { box-shadow: 0 0 20px var(--color-accent-glow-strong); }
 }
+
+.wrist-gauge-container {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wrist-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.wrist-gauge-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 160px;
+  margin: 0.5rem 0 0.2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wrist-gauge {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.2));
+}
+
+.wrist-gauge-value {
+  position: absolute;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrist-gauge-value .value-num {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-primary-light);
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  line-height: 1;
+}
+
+.wrist-gauge-value .value-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.wrist-gauge-labels {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  padding: 0 0.5rem;
+  margin-top: 0.5rem;
+}

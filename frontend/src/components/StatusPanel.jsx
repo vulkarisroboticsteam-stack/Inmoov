@@ -7,6 +7,7 @@ import CameraModal from './CameraModal';
 export default function StatusPanel({
   data,
   fingers,
+  wristAngle,
   cameraList,
   cameraIndex,
   onCameraChange,
@@ -64,6 +65,15 @@ export default function StatusPanel({
             )}
           </div>
         </div>
+
+        {data.ble_error && (
+          <div className="ble-error-box">
+            <strong>Erro BLE:</strong> {data.ble_error.includes("Bluetooth radio is not powered on") || data.ble_error.includes("POWERED_OFF")
+              ? "O Bluetooth está desativado no Windows. Ative o Bluetooth nas configurações do seu computador e tente reconectar."
+              : data.ble_error}
+          </div>
+        )}
+
         <div className="status-row mt-3">
           <span className="status-label">Câmera FPS</span>
           <span className="fps-value">{data.fps}</span>
@@ -71,7 +81,7 @@ export default function StatusPanel({
       </div>
 
       {/* FINGER TRACKING */}
-      <FingerTracking data={data} fingers={fingers} />
+      <FingerTracking data={data} fingers={fingers} wristAngle={wristAngle} />
 
       {/* TX DATA */}
       <div className="glass-card tx-card">

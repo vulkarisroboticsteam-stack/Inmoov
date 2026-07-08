@@ -12,7 +12,8 @@ function App() {
     ble_searching: false,
     fingers_str: "",
     status: "WAITING",
-    hand_type: ""
+    hand_type: "",
+    ble_error: null
   });
 
   const [cameraIndex, setCameraIndex] = useState(0);
@@ -85,7 +86,8 @@ function App() {
           ble_searching: payload.ble_searching,
           fingers_str: payload.fingers_str,
           status: payload.status,
-          hand_type: payload.hand_type
+          hand_type: payload.hand_type,
+          ble_error: payload.ble_error
         });
       };
 
@@ -107,6 +109,16 @@ function App() {
     return data.fingers_str[index + 1] === '1';
   };
 
+  const getWristAngle = () => {
+    if (!data.fingers_str || data.fingers_str.length < 10) return 90;
+    const parts = data.fingers_str.split(',');
+    if (parts.length > 1) {
+      const angle = parseInt(parts[1], 10);
+      return isNaN(angle) ? 90 : angle;
+    }
+    return 90;
+  };
+
   const fingers = [
     { name: 'Polegar', active: getFingerState(0) },
     { name: 'Indicador', active: getFingerState(1) },
@@ -125,6 +137,7 @@ function App() {
         <StatusPanel 
           data={data}
           fingers={fingers}
+          wristAngle={getWristAngle()}
           cameraList={cameraList}
           cameraIndex={cameraIndex}
           onCameraChange={handleCameraChange}

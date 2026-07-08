@@ -7,6 +7,7 @@
 #define PIN_MIDDLE 6
 #define PIN_RING   9
 #define PIN_PINKY  10
+#define PIN_WRIST  11
 
 // Nome que vai aparecer no Bluetooth
 const char* DEVICE_NAME = "InMoov_Hand";
@@ -25,8 +26,10 @@ Servo servoIndex;
 Servo servoMiddle;
 Servo servoRing;
 Servo servoPinky;
+Servo servoWrist;
 
 int valsRec[numOfValsRec] = {1, 1, 1, 1, 1};
+int wristVal = 90; // Ponto inicial de 90 graus
 
 void setup() {
   Serial.begin(115200);
@@ -37,6 +40,7 @@ void setup() {
   servoMiddle.attach(PIN_MIDDLE, 500, 2400);
   servoRing.attach(PIN_RING, 500, 2400);
   servoPinky.attach(PIN_PINKY, 500, 2400);
+  servoWrist.attach(PIN_WRIST, 500, 2400);
 
   moverServos();
 
@@ -54,7 +58,7 @@ void setup() {
 
   BLE.addService(inmoovService);
 
-  rxCharacteristic.writeValue("$11111");
+  rxCharacteristic.writeValue("$11111,090");
   txCharacteristic.writeValue("BLE iniciado");
 
   BLE.advertise();
@@ -89,6 +93,9 @@ void loop() {
         valsRec[i] = comando.substring(i + 1, i + 2).toInt();
       }
 
+      // Lê o valor do ângulo do pulso a partir da posição 7 (ex: $11111,090)
+      wristVal = comando.substring(7, 10).toInt();
+
       moverServos();
 
       txCharacteristic.writeValue("OK: " + comando);
@@ -101,7 +108,8 @@ void loop() {
 }
 
 bool comandoValido(String comando) {
-  if (comando.length() != 6) {
+  // Novo formato: $11111,090 (10 caracteres)
+  if (comando.length() != 10) {
     return false;
   }
 
@@ -116,6 +124,17 @@ bool comandoValido(String comando) {
     }
   }
 
+  if (comando.charAt(6) != ',') {
+    return false;
+  }
+
+  for (int i = 7; i <= 9; i++) {
+    char c = comando.charAt(i);
+    if (!isDigit(c)) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -125,4 +144,5 @@ void moverServos() {
   servoMiddle.write(valsRec[2] == 1 ? 180 : 0);
   servoRing.write(valsRec[3] == 1 ? 180 : 0);
   servoPinky.write(valsRec[4] == 1 ? 180 : 0);
+  servoWrist.write(wristVal);
 }
