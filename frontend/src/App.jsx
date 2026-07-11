@@ -69,6 +69,14 @@ function App() {
     }
   };
 
+  const handleResetPosition = async () => {
+    try {
+      await fetch('http://localhost:8000/api/reset_position', { method: 'POST' });
+    } catch (err) {
+      console.error("Erro ao resetar posição:", err);
+    }
+  };
+
   useEffect(() => {
     const connectWs = () => {
       ws.current = new WebSocket('ws://localhost:8000/ws');
@@ -143,6 +151,7 @@ function App() {
           onCameraChange={handleCameraChange}
           onReconnectBle={handleReconnectBle}
           onDisconnectBle={handleDisconnectBle}
+          onResetPosition={handleResetPosition}
         />
       </div>
     </>

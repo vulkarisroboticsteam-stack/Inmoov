@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../styles/StatusPanel.css';
-import { IconInstagram, IconRefresh, IconClose, IconCamera } from './Icons';
+import { IconInstagram, IconRefresh, IconClose, IconCamera, IconReset } from './Icons';
 import FingerTracking from './FingerTracking';
 import CameraModal from './CameraModal';
 
@@ -12,7 +12,8 @@ export default function StatusPanel({
   cameraIndex,
   onCameraChange,
   onReconnectBle,
-  onDisconnectBle
+  onDisconnectBle,
+  onResetPosition
 }) {
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
 
@@ -82,6 +83,16 @@ export default function StatusPanel({
 
       {/* FINGER TRACKING */}
       <FingerTracking data={data} fingers={fingers} wristAngle={wristAngle} />
+
+      {/* RESET BUTTON */}
+      <button 
+        className="btn-reset-initial" 
+        onClick={onResetPosition}
+        title="Resetar para a posição inicial (todos os dedos abaixados e o pulso em 90º)"
+      >
+        <IconReset size={18} />
+        <span>Resetar Mão</span>
+      </button>
 
       {/* TX DATA */}
       <div className="glass-card tx-card">

@@ -283,6 +283,17 @@ async def api_disconnect_ble():
     state.ble_error = None
     return {"status": "disconnected"}
 
+@app.post("/api/reset_position")
+async def api_reset_position():
+    state.fingers_to_send = "$00000,090"
+    if state.ble_connected and state.ble_client:
+        try:
+            await state.ble_client.write_gatt_char(RX_CHAR_UUID, "$00000,090".encode("utf-8"), response=False)
+            return {"status": "ok", "message": "Reset command sent"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+    return {"status": "ok", "message": "State updated, but BLE not connected"}
+
 
 @app.get("/api/cameras")
 async def get_cameras():
