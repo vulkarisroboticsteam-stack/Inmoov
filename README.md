@@ -1,4 +1,4 @@
-# 🤖 InMoov Hub: Controle de Braço Robótico com Visão Computacional
+# InMoov Hub: Controle de Braço Robótico com Visão Computacional
 
 <p align="center">
   <img src="frontend/public/logo_vulkaris.png" alt="InMoov Hub Logo" width="150"/>
@@ -28,7 +28,7 @@ Recentemente, o projeto evoluiu de um simples script para uma arquitetura modern
 
 ## 🌟 Principais Recursos
 
-- 🖐️ **Rastreamento de Mãos Robusto:** Desenho em tempo real das conexões na mão. Agora suporta tanto a **palma** quanto o **dorso da mão**, evitando perdas de tracking se a mão for virada!
+- 🖐️ **Rastreamento de Mãos e Pulso:** Desenho em tempo real das conexões na mão e rastreamento do movimento do pulso. Agora suporta tanto a **palma** quanto o **dorso da mão**, evitando perdas de tracking se a mão for virada!
 - ⚡ **Comunicação WebSockets:** Transmissão de vídeo e biometria em alta velocidade (~30 FPS) entre o servidor Python e o dashboard web.
 - 🎨 **Painel "Glassmorphism":** Interface super moderna feita em React com efeitos translúcidos e design futurista inspirado em Sci-Fi.
 - 🛜 **Controle BLE Sem Fio:** Envio instantâneo dos comandos motores do PC direto para a placa ESP32.
@@ -60,11 +60,30 @@ O repositório está organizado da seguinte forma:
 
 - 📂 arquivos_2d: Contém os arquivos vetoriais em 2D (ex: o desenho `box_inmoov.dxf` para corte a laser da caixa dos componentes).
 - 📂 arquivos_3d: Contém todos os arquivos STL para a impressão 3D das peças da mão robótica (como dedos, punho e suportes), do projeto de hardware aberto [InMoov](https://inmoov.fr).
-- 📂 esquematico_pcb: Contém o esquema elétrico/imagem da PCB (`PCB_inmoov.png`) para montagem do circuito eletrônico do projeto.
+- 📂 esquematico: Contém o esquema elétrico de ligação (`Inmoov_esquematico.png`) para montagem do circuito eletrônico do projeto.
 - 📂 frontend: Código fonte da interface web (dashboard) desenvolvida em React + Vite.
 - 📂 inmoov_hand: Contém o código C++ (`inmoov_hand.ino`) para gravação na placa ESP32, responsável pelo controle dos servomotores via BLE.
 - 📄 app.py: Arquivo principal do backend em FastAPI que realiza a captura da câmera, processamento de visão computacional (MediaPipe) e envio de dados da mão.
 
+
+---
+
+## 🔌 Esquemático e Lista de Materiais
+
+### Esquemático de Ligação
+![Esquemático de Ligação](esquematico/Inmoov_esquematico.png)
+
+### Lista de Materiais
+- Arduino Nano ESP32
+- Fio de Nylon 0.8mm
+- 6 Servo Motores JX PDI 6221MG (ou similar)
+- Fonte 6V 3A (ou maior)
+- Interruptor
+- LED 5mm
+- Resistor 1K ohm
+- Jumpers
+- Peças Corte a Laser
+- Peças Impressas 3D
 
 ---
 
@@ -75,6 +94,13 @@ O repositório está organizado da seguinte forma:
 - Node.js e NPM
 - Uma webcam conectada
 - ESP32 ligada e executando o código `.ino`
+
+### Upload do Código para a ESP32
+1. Abra o arquivo `inmoov_hand/inmoov_hand.ino` na Arduino IDE.
+2. Conecte a placa ESP32 ao seu computador via cabo USB.
+3. Na Arduino IDE, selecione a placa correspondente (ex: Arduino Nano ESP32) e a porta correta.
+4. Clique em "Carregar" (Upload) para gravar o código no microcontrolador.
+5. Após o carregamento, a ESP32 estará pronta para receber a conexão via Bluetooth.
 
 ### Backend (Processamento e IA)
 ```bash
@@ -107,9 +133,3 @@ Abra o navegador no endereço local fornecido (geralmente `http://localhost:5173
     <img height=40 title="Python" alt="Python" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg"/>&nbsp;
     <img height=40 title="OpenCV" alt="OpenCV" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/opencv/opencv-original-wordmark.svg"/>&nbsp;
  </div>
-
-<br>
-
-<p align="center">
-  Feito com 💙 para robótica inteligente.
-</p>
