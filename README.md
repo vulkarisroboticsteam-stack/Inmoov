@@ -54,6 +54,45 @@ Recentemente, o projeto evoluiu de um simples script para uma arquitetura modern
 
 ---
 
+## 📸 Fotos do Sistema
+
+As imagens do protótipo e do painel de controle ficam em [`docs/fotos`](docs/fotos).
+
+### Rastreamento da mão e painel de controle
+
+<p align="center">
+  <img src="docs/fotos/Captura%20de%20tela%202026-09-23%20160311.png" alt="Dashboard InMoov Hub com rastreamento da mão direita" width="900"/>
+</p>
+
+<!--
+Outras imagens podem ser adicionadas usando os nomes sugeridos abaixo:
+
+- `sistema-completo.jpg` — visão geral do braço robótico e da montagem.
+- `painel-controle.jpg` — dashboard web em funcionamento.
+- `eletronica.jpg` — ESP32, servomotores e conexões.
+
+<table>
+  <tr>
+    <td align="center"><strong>Sistema completo</strong></td>
+    <td align="center"><strong>Painel de controle</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/fotos/sistema-completo.jpg" alt="Sistema InMoov completo" width="420"></td>
+    <td><img src="docs/fotos/painel-controle.jpg" alt="Painel de controle InMoov Hub" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Rastreamento da mão</strong></td>
+    <td align="center"><strong>Eletrônica</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/fotos/Captura%20de%20tela%202026-09-23%20160311.png" alt="Rastreamento da mão por visão computacional" width="420"></td>
+    <td><img src="docs/fotos/eletronica.jpg" alt="Eletrônica do projeto InMoov" width="420"></td>
+  </tr>
+</table>
+-->
+
+---
+
 ## 📂 Estrutura de Pastas
 
 O repositório está organizado da seguinte forma:
