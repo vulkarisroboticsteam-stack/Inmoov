@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './index.css';
 import './App.css';
 import VideoFeed from './components/VideoFeed';
@@ -13,13 +13,47 @@ function App() {
     fingers_str: "",
     status: "WAITING",
     hand_type: "",
-    ble_error: null
+    ble_error: null,
+    tx_command: "",
+    motion_mode: "realtime",
+    recording: false,
+    recording_name: null,
+    has_recording: false,
+    recorded_count: 0,
+    recorded_duration: 0,
+    selected_motion_id: null,
+    selected_motion_name: null
   });
 
   const [cameraIndex, setCameraIndex] = useState(0);
   const [cameraList, setCameraList] = useState([]);
+  const [motionList, setMotionList] = useState([]);
+  const [motionLoading, setMotionLoading] = useState(true);
+  const [motionLoadError, setMotionLoadError] = useState(null);
+  const [motionName, setMotionName] = useState('');
+  const [motionError, setMotionError] = useState(null);
 
   const ws = useRef(null);
+
+  const loadMotions = useCallback(async () => {
+    setMotionLoading(true);
+    try {
+      const res = await fetch('http://localhost:8000/api/motions', { cache: 'no-store' });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !Array.isArray(json.motions)) {
+        throw new Error('A biblioteca de movimentos não respondeu corretamente.');
+      }
+      setMotionList(json.motions);
+      setMotionLoadError(null);
+      return true;
+    } catch (err) {
+      console.error('Erro ao carregar movimentos:', err);
+      setMotionLoadError('Não foi possível carregar os comandos salvos.');
+      return false;
+    } finally {
+      setMotionLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCameras = async () => {
@@ -34,7 +68,9 @@ function App() {
       }
     };
     fetchCameras();
-  }, []);
+    const initialMotionLoad = window.setTimeout(loadMotions, 0);
+    return () => window.clearTimeout(initialMotionLoad);
+  }, [loadMotions]);
 
   const handleCameraChange = async (indexOrEvent) => {
     const newIndex = typeof indexOrEvent === 'object' && indexOrEvent && indexOrEvent.target
@@ -77,11 +113,54 @@ function App() {
     }
   };
 
+  const handleMotionRequest = async (endpoint, options = {}) => {
+    try {
+      const res = await fetch(`http://localhost:8000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(body.detail || 'Não foi possível atualizar o movimento.');
+      }
+      await loadMotions();
+      setMotionError(null);
+      return body;
+    } catch (err) {
+      setMotionError(err.message);
+      return null;
+    }
+  };
+
+  const handleStartRecording = () => handleMotionRequest('/api/motion/record/start', {
+    body: JSON.stringify({ name: motionName.trim() })
+  });
+  const handleStopRecording = () => handleMotionRequest('/api/motion/record/stop');
+  const handleStartPlayback = () => handleMotionRequest('/api/motion/playback/start');
+  const handleStopPlayback = () => handleMotionRequest('/api/motion/playback/stop');
+  const handleSelectMotion = (motionId) => handleMotionRequest('/api/motion/select', {
+    body: JSON.stringify({ motion_id: motionId })
+  });
+  const handleRenameMotion = (motionId, name) => handleMotionRequest(`/api/motion/${encodeURIComponent(motionId)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ name: name.trim() })
+  });
+  const handleDeleteMotion = (motionId) => handleMotionRequest(`/api/motion/${encodeURIComponent(motionId)}`, {
+    method: 'DELETE'
+  });
+  const handleMotionModeChange = (mode) => handleMotionRequest('/api/motion/mode', {
+    body: JSON.stringify({ mode })
+  });
+
   useEffect(() => {
     const connectWs = () => {
       ws.current = new WebSocket('ws://localhost:8000/ws');
       
-      ws.current.onopen = () => console.log("WebSocket Conectado");
+      ws.current.onopen = () => {
+        console.log("WebSocket Conectado");
+        loadMotions();
+      };
 
       ws.current.onmessage = (event) => {
         const payload = JSON.parse(event.data);
@@ -95,7 +174,16 @@ function App() {
           fingers_str: payload.fingers_str,
           status: payload.status,
           hand_type: payload.hand_type,
-          ble_error: payload.ble_error
+          ble_error: payload.ble_error,
+          tx_command: payload.tx_command || "",
+          motion_mode: payload.motion_mode || "realtime",
+          recording: Boolean(payload.recording),
+          recording_name: payload.recording_name || null,
+          has_recording: Boolean(payload.has_recording),
+          recorded_count: payload.recorded_count || 0,
+          recorded_duration: payload.recorded_duration || 0,
+          selected_motion_id: payload.selected_motion_id || null,
+          selected_motion_name: payload.selected_motion_name || null
         });
       };
 
@@ -110,7 +198,7 @@ function App() {
     return () => {
       if (ws.current) ws.current.close();
     };
-  }, []);
+  }, [loadMotions]);
 
   const getFingerState = (index) => {
     if (!data.fingers_str || data.fingers_str.length < 6) return false;
@@ -152,6 +240,22 @@ function App() {
           onReconnectBle={handleReconnectBle}
           onDisconnectBle={handleDisconnectBle}
           onResetPosition={handleResetPosition}
+          onStartRecording={handleStartRecording}
+          onStopRecording={handleStopRecording}
+          onStartPlayback={handleStartPlayback}
+          onStopPlayback={handleStopPlayback}
+          onMotionModeChange={handleMotionModeChange}
+          motionList={motionList}
+          motionLoading={motionLoading}
+          motionLoadError={motionLoadError}
+          onReloadMotions={loadMotions}
+          motionName={motionName}
+          onMotionNameChange={setMotionName}
+          onSelectMotion={handleSelectMotion}
+          onRenameMotion={handleRenameMotion}
+          onDeleteMotion={handleDeleteMotion}
+          onClearMotionError={() => setMotionError(null)}
+          motionError={motionError}
         />
       </div>
     </>

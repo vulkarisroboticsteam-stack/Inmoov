@@ -1,0 +1,177 @@
+.motion-name-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(10, 14, 21, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: motion-name-modal-fade-in var(--transition-fast) ease-out;
+}
+
+.motion-name-modal {
+  width: min(100%, 430px);
+  padding: 1.35rem;
+  background: rgba(26, 32, 48, 0.94);
+  border-color: var(--color-border);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.62), inset 0 0 22px rgba(79, 195, 247, 0.06);
+  animation: motion-name-modal-scale-up var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.motion-name-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.motion-name-modal-header h2 {
+  margin-top: 0.25rem;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.motion-name-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.motion-name-modal-close:hover,
+.motion-name-modal-close:focus-visible {
+  color: var(--color-accent-light);
+  border-color: var(--color-accent);
+  background: var(--color-accent-glow);
+  outline: none;
+}
+
+.motion-name-modal-divider {
+  height: 2px;
+  margin: 0.85rem 0 1rem;
+  border-radius: 1px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent), transparent);
+}
+
+.motion-name-modal-description {
+  margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.motion-name-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.motion-name-modal-field input {
+  width: 100%;
+  padding: 0.68rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.24);
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.motion-name-modal-field input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.motion-name-modal-field input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.motion-name-modal-error {
+  margin-top: 0.7rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--color-border-accent);
+  border-radius: 6px;
+  color: var(--color-accent-light);
+  background: rgba(255, 107, 26, 0.08);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.motion-name-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.motion-name-modal-btn {
+  min-height: 38px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.motion-name-modal-btn--cancel {
+  color: var(--color-text-secondary);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.motion-name-modal-btn--cancel:hover,
+.motion-name-modal-btn--cancel:focus-visible {
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.motion-name-modal-btn--confirm {
+  color: var(--color-btn-primary-text);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  box-shadow: 0 4px 16px var(--color-primary-glow);
+}
+
+.motion-name-modal-btn--confirm:hover:not(:disabled),
+.motion-name-modal-btn--confirm:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 20px var(--color-primary-glow-strong);
+  outline: none;
+}
+
+.motion-name-modal-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+@keyframes motion-name-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes motion-name-modal-scale-up {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
