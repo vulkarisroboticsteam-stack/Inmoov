@@ -38,6 +38,7 @@ export default function StatusPanel({
   const [isMotionNameModalOpen, setIsMotionNameModalOpen] = useState(false);
   const [isMotionDeleteModalOpen, setIsMotionDeleteModalOpen] = useState(false);
   const [motionModalMode, setMotionModalMode] = useState('create');
+  const appVersion = import.meta.env.VITE_APP_VERSION;
   const selectedMotion = motionList.find((motion) => motion.id === data.selected_motion_id);
 
   const handleConfirmMotionModal = async () => {
@@ -82,7 +83,10 @@ export default function StatusPanel({
         <div className="brand-section">
           <img src="/logo_vulkaris.png" alt="Logo" className="brand-logo" />
           <div className="brand-titles">
-            <h1 className="gradient-text">INMOOV HUB</h1>
+            <div className="brand-title-row">
+              <h1 className="gradient-text">INMOOV HUB</h1>
+              <span className="app-version" aria-label={`Versão ${appVersion}`}>v{appVersion}</span>
+            </div>
             <p>Painel de Controle Biométrico</p>
           </div>
         </div>

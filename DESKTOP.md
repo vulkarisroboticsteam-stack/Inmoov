@@ -2,6 +2,8 @@
 
 O aplicativo desktop usa Electron para abrir o painel em uma janela própria. O backend Python e suas bibliotecas são empacotados junto com a interface; a pessoa que instala não precisa instalar Python ou Node.js.
 
+A versão aparece ao lado do nome do aplicativo e vem de `frontend/package.json`. Em builds de tag, o workflow aplica a versão da própria tag antes de compilar.
+
 ## Plataformas geradas
 
 - Windows x64: instalador `.exe`.

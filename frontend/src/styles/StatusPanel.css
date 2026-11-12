@@ -43,12 +43,33 @@
   animation: logo-levitate 6s ease-in-out infinite;
 }
 
+.brand-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
 .brand-titles h1 {
   font-family: var(--font-display);
   font-size: 1.4rem;
   font-weight: 900;
   letter-spacing: 0.5px;
-  margin-bottom: 2px;
+  line-height: 1.1;
+}
+
+.app-version {
+  padding: 0.12rem 0.38rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-secondary);
+  -webkit-text-fill-color: currentColor;
+  font-family: var(--font-display), monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .brand-titles p {
