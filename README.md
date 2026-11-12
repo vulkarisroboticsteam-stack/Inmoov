@@ -218,3 +218,7 @@ O projeto utiliza como referência o projeto aberto de robótica InMoov. Crédit
 ## 📝 Licença
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## Aplicativo desktop
+
+O aplicativo para Windows, Linux e macOS, incluindo o fluxo de builds do GitHub Actions, está documentado em [`DESKTOP.md`](DESKTOP.md).

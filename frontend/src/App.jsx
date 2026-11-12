@@ -38,7 +38,7 @@ function App() {
   const loadMotions = useCallback(async () => {
     setMotionLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/motions', { cache: 'no-store' });
+      const res = await fetch('/api/motions', { cache: 'no-store' });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !Array.isArray(json.motions)) {
         throw new Error('A biblioteca de movimentos não respondeu corretamente.');
@@ -58,7 +58,7 @@ function App() {
   useEffect(() => {
     const fetchCameras = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/cameras');
+        const res = await fetch('/api/cameras');
         const json = await res.json();
         if (json.cameras) {
           setCameraList(json.cameras);
@@ -79,7 +79,7 @@ function App() {
 
     setCameraIndex(newIndex);
     try {
-      await fetch('http://localhost:8000/api/set_camera', {
+      await fetch('/api/set_camera', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ index: newIndex })
@@ -91,7 +91,7 @@ function App() {
 
   const handleReconnectBle = async () => {
     try {
-      await fetch('http://localhost:8000/api/reconnect_ble', { method: 'POST' });
+      await fetch('/api/reconnect_ble', { method: 'POST' });
     } catch (err) {
       console.error("Erro ao reconectar BLE:", err);
     }
@@ -99,7 +99,7 @@ function App() {
 
   const handleDisconnectBle = async () => {
     try {
-      await fetch('http://localhost:8000/api/disconnect_ble', { method: 'POST' });
+      await fetch('/api/disconnect_ble', { method: 'POST' });
     } catch (err) {
       console.error("Erro ao desconectar BLE:", err);
     }
@@ -107,7 +107,7 @@ function App() {
 
   const handleResetPosition = async () => {
     try {
-      await fetch('http://localhost:8000/api/reset_position', { method: 'POST' });
+      await fetch('/api/reset_position', { method: 'POST' });
     } catch (err) {
       console.error("Erro ao resetar posição:", err);
     }
@@ -115,7 +115,7 @@ function App() {
 
   const handleMotionRequest = async (endpoint, options = {}) => {
     try {
-      const res = await fetch(`http://localhost:8000${endpoint}`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         ...options
@@ -155,7 +155,8 @@ function App() {
 
   useEffect(() => {
     const connectWs = () => {
-      ws.current = new WebSocket('ws://localhost:8000/ws');
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws.current = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
       
       ws.current.onopen = () => {
         console.log("WebSocket Conectado");

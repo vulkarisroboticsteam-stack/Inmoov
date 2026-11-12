@@ -43,6 +43,7 @@ dist/
 frontend/dist/
 build/
 frontend/build/
+release/
 .npm/
 frontend/.npm/
 logs

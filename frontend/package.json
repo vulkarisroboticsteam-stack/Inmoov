@@ -1,13 +1,16 @@
 {
-  "name": "frontend",
+  "name": "inmoov-hub-desktop",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "main": "desktop/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "desktop:dev": "concurrently -k \"npm:dev -- --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env INMOOV_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "desktop:dist": "electron-builder"
   },
   "dependencies": {
     "react": "^19.2.6",
@@ -22,6 +25,69 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^41.0.0",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^8.0.3",
     "vite": "^8.0.12"
+  },
+  "build": {
+    "appId": "com.vulkaris.inmoovhub",
+    "productName": "InMoov Hub",
+    "directories": {
+      "output": "../release"
+    },
+    "files": [
+      "dist/**/*",
+      "desktop/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../build/backend-dist/inmoov-backend",
+        "to": "backend"
+      }
+    ],
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "maintainer": "InMoov Hub",
+      "deb": {
+        "depends": [
+          "bluez",
+          "libgtk-3-0",
+          "libnotify4",
+          "libnss3",
+          "libxss1",
+          "libxtst6",
+          "xdg-utils",
+          "libatspi2.0-0",
+          "libuuid1",
+          "libsecret-1-0",
+          "libgl1",
+          "libglib2.0-0"
+        ]
+      }
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.utilities"
+    }
   }
 }

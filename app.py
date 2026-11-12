@@ -12,6 +12,7 @@ from cvzone.HandTrackingModule import HandDetector
 from bleak import BleakScanner, BleakClient
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import warnings
 import math
@@ -31,7 +32,12 @@ except Exception:
 DEVICE_NAME = "InMoov_Hand"
 RX_CHAR_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 TX_CHAR_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
-MOTIONS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "movimentos")
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+BUNDLE_DIR = getattr(sys, "_MEIPASS", APP_DIR)
+DEFAULT_DATA_DIR = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else APP_DIR
+DATA_DIR = os.environ.get("INMOOV_DATA_DIR", DEFAULT_DATA_DIR)
+MOTIONS_DIR = os.path.join(DATA_DIR, "movimentos")
+FRONTEND_DIST_DIR = os.path.join(BUNDLE_DIR, "frontend", "dist")
 
 #gestos_bloqueados = ["$00100", "$10100"]
 gestos_bloqueados = []
@@ -201,7 +207,7 @@ def load_saved_motion(motion_id):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -778,5 +784,19 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"Erro no WebSocket: {e}")
 
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+
+if os.path.isdir(FRONTEND_DIST_DIR):
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST_DIR, html=True), name="frontend")
+
+
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app,
+        host=os.environ.get("INMOOV_HOST", "127.0.0.1"),
+        port=int(os.environ.get("INMOOV_PORT", "8000")),
+    )

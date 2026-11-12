@@ -1,0 +1,102 @@
+name: Build desktop installers
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package ${{ matrix.id }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: windows-x64
+            runner: windows-2025
+            args: --win nsis --x64
+          - id: linux-x64
+            runner: ubuntu-22.04
+            args: --linux AppImage deb --x64
+          - id: linux-arm64
+            runner: ubuntu-22.04-arm
+            args: --linux AppImage deb --arm64
+          - id: macos-x64
+            runner: macos-15-intel
+            args: --mac dmg zip --x64
+          - id: macos-arm64
+            runner: macos-15
+            args: --mac dmg zip --arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.10'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.13.0'
+
+      - name: Install frontend packages
+        working-directory: frontend
+        run: npm ci
+
+      - name: Compile frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Set package version from release tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: node scripts/set_package_version.mjs
+
+      - name: Install Python packages
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt -r requirements-build.txt
+
+      - name: Package Python backend
+        run: python scripts/build_backend.py
+
+      - name: Build desktop installer
+        working-directory: frontend
+        run: npx electron-builder ${{ matrix.args }}
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: inmoov-desktop-${{ matrix.id }}
+          path: |
+            release/*.exe
+            release/*.AppImage
+            release/*.deb
+            release/*.dmg
+            release/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-release:
+    name: Publish tagged release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download installer artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: inmoov-desktop-*
+          path: release-files
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-files/* --repo "$GITHUB_REPOSITORY" --title "InMoov Hub $GITHUB_REF_NAME" --generate-notes
