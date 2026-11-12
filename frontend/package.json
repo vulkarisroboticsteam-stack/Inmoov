@@ -2,6 +2,9 @@
   "name": "inmoov-hub-desktop",
   "private": true,
   "version": "0.1.0",
+  "description": "Painel desktop para rastreamento e controle da mão robótica InMoov.",
+  "author": "Vulkaris Robotic Team",
+  "homepage": "https://github.com/vulkarisroboticsteam-stack/Inmoov",
   "type": "module",
   "main": "desktop/main.cjs",
   "scripts": {
