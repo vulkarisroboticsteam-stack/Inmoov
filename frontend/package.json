@@ -67,23 +67,23 @@
     "linux": {
       "target": ["AppImage", "deb"],
       "category": "Utility",
-      "maintainer": "InMoov Hub",
-      "deb": {
-        "depends": [
-          "bluez",
-          "libgtk-3-0",
-          "libnotify4",
-          "libnss3",
-          "libxss1",
-          "libxtst6",
-          "xdg-utils",
-          "libatspi2.0-0",
-          "libuuid1",
-          "libsecret-1-0",
-          "libgl1",
-          "libglib2.0-0"
-        ]
-      }
+      "maintainer": "InMoov Hub"
+    },
+    "deb": {
+      "depends": [
+        "bluez",
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0",
+        "libgl1",
+        "libglib2.0-0"
+      ]
     },
     "mac": {
       "target": ["dmg", "zip"],
