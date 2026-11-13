@@ -50,13 +50,13 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Compile frontend
-        working-directory: frontend
-        run: npm run build
-
       - name: Set package version from release tag
         if: startsWith(github.ref, 'refs/tags/v')
         run: node scripts/set_package_version.mjs
+
+      - name: Compile frontend
+        working-directory: frontend
+        run: npm run build
 
       - name: Install Python packages
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt -r requirements-build.txt
