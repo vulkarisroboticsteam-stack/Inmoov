@@ -97,6 +97,8 @@ class AppState:
         self.selected_motion_id = None
 
 state = AppState()
+_ble_loop = None
+_ble_thread = None
 app = FastAPI()
 
 
@@ -285,6 +287,75 @@ async def ble_sender_loop():
                 except Exception as e:
                     pass
         await asyncio.sleep(0.01)
+
+
+def ble_event_loop_worker():
+    global _ble_loop
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    _ble_loop = loop
+    loop.create_task(ble_sender_loop())
+    try:
+        loop.run_forever()
+    finally:
+        pending = asyncio.all_tasks(loop)
+        for task in pending:
+            task.cancel()
+        if pending:
+            loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+        loop.close()
+        _ble_loop = None
+
+
+def start_ble_worker():
+    global _ble_thread
+    if _ble_thread and _ble_thread.is_alive():
+        return
+    _ble_thread = threading.Thread(
+        target=ble_event_loop_worker,
+        name="InMoov-BLE",
+        daemon=True,
+    )
+    _ble_thread.start()
+
+
+def submit_ble(coroutine):
+    if sys.platform == "win32":
+        if _ble_loop is None or not _ble_loop.is_running():
+            coroutine.close()
+            raise RuntimeError("O loop BLE ainda não está disponível.")
+        return asyncio.run_coroutine_threadsafe(coroutine, _ble_loop)
+    return asyncio.create_task(coroutine)
+
+
+async def await_ble(coroutine):
+    task = submit_ble(coroutine)
+    if isinstance(task, asyncio.Task):
+        return await task
+    return await asyncio.wrap_future(task)
+
+
+async def disconnect_ble():
+    if state.ble_client and state.ble_connected:
+        try:
+            await state.ble_client.disconnect()
+        except Exception as exc:
+            print(f"Erro ao desconectar BLE: {exc}")
+    state.ble_client = None
+    state.ble_connected = False
+    state.ble_searching = False
+    state.ble_error = None
+
+
+async def write_ble_command(command):
+    if not state.ble_connected or not state.ble_client:
+        return False
+    await state.ble_client.write_gatt_char(
+        RX_CHAR_UUID,
+        command.encode("utf-8"),
+        response=False,
+    )
+    return True
 
 
 def update_live_command(command):
@@ -501,26 +572,52 @@ def camera_thread_func():
 
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(connect_ble())
-    asyncio.create_task(ble_sender_loop())
+    if sys.platform == "win32":
+        try:
+            start_ble_worker()
+            for _ in range(100):
+                if _ble_loop is not None and _ble_loop.is_running():
+                    break
+                await asyncio.sleep(0.01)
+            if _ble_loop is None or not _ble_loop.is_running():
+                raise RuntimeError("O loop BLE do Windows não iniciou.")
+            submit_ble(connect_ble())
+        except Exception as exc:
+            state.ble_error = str(exc)
+            print(f"Erro ao iniciar worker BLE: {exc}")
+    else:
+        asyncio.create_task(connect_ble())
+        asyncio.create_task(ble_sender_loop())
     threading.Thread(target=camera_thread_func, daemon=True).start()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    if _ble_loop is not None and _ble_loop.is_running():
+        try:
+            await await_ble(disconnect_ble())
+        except Exception as exc:
+            print(f"Erro ao encerrar worker BLE: {exc}")
+        _ble_loop.call_soon_threadsafe(_ble_loop.stop)
+        if _ble_thread is not None:
+            _ble_thread.join(timeout=2)
 
 @app.post("/api/reconnect_ble")
 async def api_reconnect_ble():
-    asyncio.create_task(connect_ble())
+    try:
+        submit_ble(connect_ble())
+    except Exception as exc:
+        state.ble_error = str(exc)
+        return {"status": "error", "message": state.ble_error}
     return {"status": "reconnecting"}
 
 @app.post("/api/disconnect_ble")
 async def api_disconnect_ble():
-    if state.ble_client and state.ble_connected:
-        try:
-            await state.ble_client.disconnect()
-        except:
-            pass
-    state.ble_client = None
-    state.ble_connected = False
-    state.ble_searching = False
-    state.ble_error = None
+    try:
+        await await_ble(disconnect_ble())
+    except Exception as exc:
+        state.ble_error = str(exc)
+        return {"status": "error", "message": state.ble_error}
     return {"status": "disconnected"}
 
 @app.post("/api/reset_position")
@@ -534,7 +631,7 @@ async def api_reset_position():
         state.fingers_to_send = "$00000,090"
     if state.ble_connected and state.ble_client:
         try:
-            await state.ble_client.write_gatt_char(RX_CHAR_UUID, "$00000,090".encode("utf-8"), response=False)
+            await await_ble(write_ble_command("$00000,090"))
             return {"status": "ok", "message": "Reset command sent"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
