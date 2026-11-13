@@ -82,8 +82,8 @@ jobs:
           retention-days: 30
 
   publish-release:
-    name: Publish tagged release
-    if: startsWith(github.ref, 'refs/tags/v')
+    name: Publish GitHub releases
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
     needs: package
     runs-on: ubuntu-22.04
     permissions:
@@ -96,7 +96,33 @@ jobs:
           path: release-files
           merge-multiple: true
 
-      - name: Publish GitHub Release
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" release-files/* --repo "$GITHUB_REPOSITORY" --title "InMoov Hub $GITHUB_REF_NAME" --generate-notes
+
+      - name: Publish latest main build
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="continuous"
+          release_title="InMoov Hub — build mais recente"
+          release_notes="Build automático do branch main. Commit: $GITHUB_SHA"
+
+          if gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$release_tag" --repo "$GITHUB_REPOSITORY" --title "$release_title" --notes "$release_notes" --prerelease --target "$GITHUB_SHA"
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/$release_tag" -f sha="$GITHUB_SHA" -F force=true >/dev/null
+            gh release upload "$release_tag" release-files/* --repo "$GITHUB_REPOSITORY" --clobber
+
+            new_assets=$(find release-files -maxdepth 1 -type f -printf '%f\n' | sort)
+            old_assets=$(gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')
+            while IFS= read -r asset; do
+              if [ -n "$asset" ] && ! printf '%s\n' "$new_assets" | grep -Fqx -- "$asset"; then
+                gh release delete-asset "$release_tag" "$asset" --repo "$GITHUB_REPOSITORY" --yes
+              fi
+            done <<< "$old_assets"
+          else
+            gh release create "$release_tag" release-files/* --repo "$GITHUB_REPOSITORY" --title "$release_title" --notes "$release_notes" --prerelease --target "$GITHUB_SHA"
+          fi

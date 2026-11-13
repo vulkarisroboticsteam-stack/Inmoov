@@ -50,9 +50,9 @@ O empacotamento deve ser executado no sistema de destino. Para Linux e macOS, us
 
 ## Builds automáticos no GitHub
 
-- Cada push para `main` gera instaladores como artefatos do workflow **Build desktop installers**. Eles ficam disponíveis por 30 dias na página da execução.
-- Criar uma tag `v*` executa a matriz e publica os instaladores em uma GitHub Release. A versão dos instaladores vem da tag, por exemplo `v0.1.1`.
-- Os binários ficam nos artefatos e releases, não no histórico Git. Assim, o repositório não acumula executáveis grandes e distintos para cada sistema.
+- Cada push para `main` gera instaladores como artefatos do workflow **Build desktop installers** e atualiza a pré-release `continuous` com o build mais recente. Os artefatos da execução ficam disponíveis por 30 dias; os arquivos da pré-release permanecem até o próximo push, quando são substituídos.
+- Criar uma tag `v*` executa a matriz e publica uma GitHub Release versionada, por exemplo `v0.1.1`. Essas releases preservam os instaladores daquela versão.
+- Os binários ficam nos artefatos e releases, não no histórico Git. Assim, o repositório não acumula executáveis grandes no histórico de código.
 
 ## Dependências no computador de destino
 
